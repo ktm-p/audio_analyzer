@@ -31,18 +31,6 @@ void keyPressed() {
   }
 }
 
-void playStatus() {
-  if (player.isPlaying()) {
-    text("Press 'a' to pause.", 5, 75);
-  } else {
-    text("Press 'a' to play.", 5, 75);
-  }
-}
-
-void fileInfo() {
-  text("File name: " + meta.fileName(), 5, 25);
-}
-
 void trackTime() {
   currentPosition = player.position() / 1000;
   int s = currentPosition % 60;
@@ -51,29 +39,23 @@ void trackTime() {
   text(t, width - 110, 456);
 }
 
-void draw() {
-  background(0);
-  
-  // Shows name of current file, along with playing stauts on top-left corner
+void drawHeader() {
   textSize(24);
-  playStatus();
-  fileInfo();
   
+  // Shows name of audio file being played.
+  text("File name: " + meta.fileName(), 5, 25);
+  
+  // Shows current playing status of the audio.
+  if (player.isPlaying()) {
+    text("Press 'a' to pause.", 5, 50);
+  } else {
+    text("Press 'a' to play.", 5, 50);
+  }
+}
+
+void drawPosition() {
   // Shows current time of the track
   trackTime();
-  
-  
-  stroke(255, 255, 0, min(time, 255));
-  noFill();
-  
-  // Draws waveform of audio
-  beginShape();
-  for (int i = 0; i < bufferSize; i += 1)
-  {
-    float x1 = map(i, 0, bufferSize, 0, width);
-    vertex(x1, 256 + player.left.get(i) * 50);
-  }
-  endShape();
   
   // Draws current position in the track.
   beginShape();
@@ -84,9 +66,35 @@ void draw() {
   strokeWeight(2);
   line(posx, height - 56, posx, height - 68);
   endShape();
+}
+
+void draw() {
+  background(0);
+  
+  fill(255);
+  drawHeader();
+  drawPosition();
   
   // Fade-in effect for waveform
-  if (player.isPlaying()) {
-    time += 1;
+  stroke(255, 255, 0, min(time, 255));
+  //if (player.isPlaying()) {
+  //  time += 1;
+  //}
+  
+  // Draws waveform of audio
+  stroke(255, 255, 0);
+  noFill();
+  beginShape();
+  for (int i = 0; i < bufferSize; i += 1)
+  {
+    float x1 = map(i, 0, bufferSize, 0, width);
+    vertex(x1, 256 + player.left.get(i) * 50);
   }
+  endShape();
+  
+  //// Draws level bar of audio
+  //noStroke();
+  //fill(255, 128);
+  //rect(0, 192, player.left.level() * width, 128);
+  ellipse(512, 256, player.left.level() * height, player.left.level() * height);
 }
