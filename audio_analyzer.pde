@@ -18,8 +18,6 @@ float maxFreq = 300;
 float[] freqArr = new float[(int) maxFreq];
 float beatRadius;
 
-boolean visualizer;
-
 int findMaxSample() {
   int maxI = 0;
   float maxVal = 0;
@@ -53,13 +51,6 @@ void drawHeader() {
     text("Press 'a' to pause.", 5, 50);
   } else {
     text("Press 'a' to play.", 5, 50);
-  }
-  
-  // Switch between waveform analysis and audio visualizer.
-  if (visualizer) {
-    text("Press 'v' to view waveform analysis.", 5, 75);
-  } else {
-    text("Press 'v' to view audio visualizer.", 5, 75);
   }
 }
 
@@ -242,9 +233,6 @@ void keyPressed() {
       player.play();
     }
   }
-  else if (key == 'v') {
-    visualizer = !visualizer;
-  }
 }
 
 void setup() {
@@ -256,7 +244,6 @@ void setup() {
   beat = new BeatDetect();
   
   bufferSize = player.bufferSize();
-  visualizer = false;
  }
 
 void draw() {
@@ -269,17 +256,9 @@ void draw() {
   
   maxSample = findMaxSample();
   
-  if (!visualizer) {
-    drawWaveform();
-    drawLevel();
-    drawDFT();
-    drawPolar();
-    drawBeat();
-  }
-  else {
-    drawPolar();
-  }
-  
-  //text("Player Position: " + player.position(), (3*width)/4, (height / 2) + 100);
-  //text("Player Length: " + player.length(), (3*width)/4, (height / 2) + 200);
+  drawWaveform();
+  drawLevel();
+  drawDFT();
+  drawPolar();
+  drawBeat();
 }
