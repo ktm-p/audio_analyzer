@@ -1,10 +1,12 @@
 import processing.sound.*;
 import ddf.minim.*;
+import ddf.minim.analysis.*;
 import complexnumbers.*;
 
 Minim minim;
 AudioPlayer player;
 AudioMetaData meta;
+BeatDetect beat;
 
 float bufferSize;
 
@@ -14,6 +16,7 @@ int currentPosition;
 int maxSample;
 float maxFreq = 300;
 float[] freqArr = new float[(int) maxFreq];
+float beatRadius;
 
 boolean visualizer;
 
@@ -129,6 +132,7 @@ void drawDFT() {
   float y1;
   float x2;
   float y2;
+  
   // Raw RDFT 
   stroke(255, 0, 0);
   noFill();
@@ -190,14 +194,39 @@ void drawPolar() {
   noFill();
   rect((width / 2) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
   line(midX - (lineDist/2), (height / 2) + 100, midX + (lineDist/2), (height / 2) + 100);
-  line((5 * width) / 8, (height / 2) - 50, (5 * width) / 8, (height / 2) + 250);
+  line(midX, (height / 2) - 50, midX, (height / 2) + 250);
   
   //rect(((3 *width) / 4) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
   fill(255, 255, 255);
   text("Waveform Polar Graph:", (width / 2) + 25, (height / 2) - 100);
 }
 
-void drawLevelGraph() {
+void drawBeat() {
+  float lineDist = ((height / 2) + 250) - ((height / 2) - 50);
+  int midX = (7 * width) / 8;
+  int midY = (((height / 2) + 250) + ((height / 2) - 50))/2;
+  
+  noStroke();
+  float a = map(beatRadius, 20, 80, 60, 255);
+  fill(255, 255, 0, a);
+  if (beat.isOnset()) {
+    beatRadius = (3 * lineDist)/4;
+  }
+  ellipse(midX, midY, beatRadius, beatRadius);
+  beatRadius *= 0.95;
+  if (beatRadius < 20) {
+    beatRadius = 20;
+  }
+  
+  stroke(255, 255, 255);
+  strokeWeight(2);
+  noFill();
+  //rect((width / 2) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
+  rect(((3 *width) / 4) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
+  line(midX - (lineDist/2), (height / 2) + 100, midX + (lineDist/2), (height / 2) + 100);
+  line(midX, (height / 2) - 50, midX, (height / 2) + 250);
+  fill(255, 255, 255);
+  text("Beat:", ((3 * width) / 4) + 25, (height / 2) - 100);
 }
 
 void keyPressed() {
@@ -224,12 +253,15 @@ void setup() {
   minim = new Minim(this);
   player = minim.loadFile("xu.mp3");
   meta = player.getMetaData();
+  beat = new BeatDetect();
+  
   bufferSize = player.bufferSize();
   visualizer = false;
  }
 
 void draw() {
   background(0);
+  beat.detect(player.mix);
   
   fill(255);
   drawHeader();
@@ -242,6 +274,7 @@ void draw() {
     drawLevel();
     drawDFT();
     drawPolar();
+    drawBeat();
   }
   else {
     drawPolar();
