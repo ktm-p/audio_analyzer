@@ -1,3 +1,4 @@
+import processing.sound.*;
 import ddf.minim.*;
 import complexnumbers.*;
 
@@ -133,7 +134,7 @@ void drawDFT() {
   noFill();
   beginShape();
   for (float f = 0; f < maxFreq; f++) {
-    x1 = map(f, 0, maxFreq, 10, (width / 2) - 5);
+    x1 = map(f, 0, maxFreq, 10, (width / 2) - 10);
     y1 = abs(realDFT(f));
     freqArr[(int) f] += (y1 - freqArr[(int) f]) * 0.1;
     //x2 = map(f + 1, 0, maxFreq, 10, (width / 2) - 5);
@@ -154,7 +155,7 @@ void drawDFT() {
   stroke(255, 255, 0);
   beginShape();
   for (float f = 0; f < maxFreq; f++) {
-    x2 = map(f, 0, maxFreq, 10, (width / 2) - 5);
+    x2 = map(f, 0, maxFreq, 10, (width / 2) - 10);
     y2 = (5 * -freqArr[(int) f]) + (height / 2) + 100;
     y2 = max(y2, (height / 2) - 90);
     vertex(x2, y2);
@@ -167,6 +168,36 @@ void drawDFT() {
   rect(10, (height / 2) - 130, (width / 2) - 20, (height / 2) - 20);
   fill(255, 255, 255);
   text("RDFT:", 25, (height / 2) - 100);
+}
+
+void drawPolar() {
+  float lineDist = ((height / 2) + 250) - ((height / 2) - 50);
+  int midX = (5 * width) / 8;
+  int midY = (((height / 2) + 250) + ((height / 2) - 50))/2;
+  
+  stroke(255, 255, 0);
+  strokeWeight(2);
+  noFill();
+  beginShape();
+  for (int i = 0; i < bufferSize; i += 5) {
+    float theta = map(i, 0, bufferSize, 0, TWO_PI);
+    float r = player.left.get(i);
+    vertex(midX + 200 * r * cos(theta), midY + 200 * r * sin(theta)); 
+  }
+  endShape();
+  
+  stroke(255, 255, 255);
+  noFill();
+  rect((width / 2) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
+  line(midX - (lineDist/2), (height / 2) + 100, midX + (lineDist/2), (height / 2) + 100);
+  line((5 * width) / 8, (height / 2) - 50, (5 * width) / 8, (height / 2) + 250);
+  
+  //rect(((3 *width) / 4) + 10, (height / 2) - 130, (width / 4) - 20, (height / 2) - 20);
+  fill(255, 255, 255);
+  text("Waveform Polar Graph:", (width / 2) + 25, (height / 2) - 100);
+}
+
+void drawLevelGraph() {
 }
 
 void keyPressed() {
@@ -187,10 +218,6 @@ void keyPressed() {
   }
 }
 
-void drawSquare() {
-  
-}
-
 void setup() {
   fullScreen(P3D);
   
@@ -198,7 +225,7 @@ void setup() {
   player = minim.loadFile("xu.mp3");
   meta = player.getMetaData();
   bufferSize = player.bufferSize();
-  visualizer = true;
+  visualizer = false;
  }
 
 void draw() {
@@ -214,11 +241,12 @@ void draw() {
     drawWaveform();
     drawLevel();
     drawDFT();
+    drawPolar();
   }
   else {
-    drawDFT();
+    drawPolar();
   }
   
-  text("Player Position: " + player.position(), (3*width)/4, (height / 2) + 100);
-  text("Player Length: " + player.length(), (3*width)/4, (height / 2) + 200);
+  //text("Player Position: " + player.position(), (3*width)/4, (height / 2) + 100);
+  //text("Player Length: " + player.length(), (3*width)/4, (height / 2) + 200);
 }
